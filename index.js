@@ -4,20 +4,35 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static('public'));
 
-const dataFilePath = path.join(__dirname, 'data', 'data.json');
+app.get('/', (req, res) => {
+    res.sendFile(`${__dirname}/public/index.html`);
+});
 
+app.get('/activityData', (req, res) => {
+    res.sendFile(`${__dirname}/public/activityData.html`);
+});
+
+app.get('/cityData', (req, res) => {
+    res.sendFile(`${__dirname}/public/cityData.html`);
+});
+
+
+const activityDB = path.join(__dirname, 'data', 'activityData.json');
+const cityDB = path.join(__dirname, 'data', 'cityData.json');
+
+// =======================================================================================================
 // Create data directory if not exists
-if (!fs.existsSync(path.dirname(dataFilePath))) {
-    fs.mkdirSync(path.dirname(dataFilePath), { recursive: true });
+if (!fs.existsSync(path.dirname(activityDB))) {
+    fs.mkdirSync(path.dirname(activityDB), { recursive: true });
 }
 
-app.get('/api/data', (req, res) => {
-    fs.readFile(dataFilePath, 'utf8', (err, data) => {
+app.get('/api/activityData', (req, res) => {
+    fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -25,12 +40,12 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-app.post('/api/data', (req, res) => {
+app.post('/api/activityData', (req, res) => {
     const { activity, description, price } = req.body;
     const id = uuidv4();
     const newRecord = { id, activity, description, price };
 
-    fs.readFile(dataFilePath, 'utf8', (err, data) => {
+    fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -38,7 +53,7 @@ app.post('/api/data', (req, res) => {
         const jsonData = JSON.parse(data);
         jsonData.push(newRecord);
 
-        fs.writeFile(dataFilePath, JSON.stringify(jsonData, null, 2), (err) => {
+        fs.writeFile(activityDB, JSON.stringify(jsonData, null, 2), (err) => {
             if (err) {
                 return res.status(500).json({ error: 'Error writing to data file' });
             }
@@ -47,11 +62,11 @@ app.post('/api/data', (req, res) => {
     });
 });
 
-app.put('/api/data/:id', (req, res) => {
+app.put('/api/activityData/:id', (req, res) => {
     const id = req.params.id;
     const { activity, description, price } = req.body;
 
-    fs.readFile(dataFilePath, 'utf8', (err, data) => {
+    fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -64,7 +79,7 @@ app.put('/api/data/:id', (req, res) => {
 
         jsonData[index] = { id, activity, description, price };
 
-        fs.writeFile(dataFilePath, JSON.stringify(jsonData, null, 2), (err) => {
+        fs.writeFile(activityDB, JSON.stringify(jsonData, null, 2), (err) => {
             if (err) {
                 return res.status(500).json({ error: 'Error writing to data file' });
             }
@@ -73,10 +88,10 @@ app.put('/api/data/:id', (req, res) => {
     });
 });
 
-app.delete('/api/data/:id', (req, res) => {
+app.delete('/api/activityData/:id', (req, res) => {
     const id = req.params.id;
 
-    fs.readFile(dataFilePath, 'utf8', (err, data) => {
+    fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -89,7 +104,7 @@ app.delete('/api/data/:id', (req, res) => {
 
         jsonData.splice(index, 1);
 
-        fs.writeFile(dataFilePath, JSON.stringify(jsonData, null, 2), (err) => {
+        fs.writeFile(activityDB, JSON.stringify(jsonData, null, 2), (err) => {
             if (err) {
                 return res.status(500).json({ error: 'Error writing to data file' });
             }
@@ -97,6 +112,96 @@ app.delete('/api/data/:id', (req, res) => {
         });
     });
 });
+// =======================================================================================================
+
+// Create data directory if not exists
+if (!fs.existsSync(path.dirname(cityDB))) {
+    fs.mkdirSync(path.dirname(cityDB), { recursive: true });
+}
+
+app.get('/api/cityData', (req, res) => {
+    fs.readFile(cityDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+        res.status(200).json(JSON.parse(data));
+    });
+});
+
+app.post('/api/cityData', (req, res) => {
+    const { city, places } = req.body;
+    const id = uuidv4();
+    const newRecord = { id, city, places };
+
+    fs.readFile(cityDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        const jsonData = JSON.parse(data);
+        jsonData.push(newRecord);
+
+        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Data saved successfully', id });
+        });
+    });
+});
+
+app.put('/api/cityData/:id', (req, res) => {
+    const id = req.params.id;
+    const { city, places } = req.body;
+
+    fs.readFile(cityDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        let jsonData = JSON.parse(data);
+        const index = jsonData.findIndex(item => item.id === id);
+        if (index === -1) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        jsonData[index] = { id, city, places };
+
+        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Data updated successfully' });
+        });
+    });
+});
+
+app.delete('/api/cityData/:id', (req, res) => {
+    const id = req.params.id;
+
+    fs.readFile(cityDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        let jsonData = JSON.parse(data);
+        const index = jsonData.findIndex(item => item.id === id);
+        if (index === -1) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        jsonData.splice(index, 1);
+
+        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Record deleted successfully' });
+        });
+    });
+});
+
+// =======================================================================================================
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

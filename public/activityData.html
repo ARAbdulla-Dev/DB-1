@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Data Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/x-icon" href="img/defualt.png">
+</head>
+<body>
+    <h1>Activity Data Management</h1>  
+    <center>
+    <i class="fas fa-tree"></i>
+    </center>
+    <div id="app">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Activity</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="newRecordForm" style="display: none;">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closeNewRecordForm()">&times;</span>
+            <h2>Add New Record</h2>
+            <form id="addForm">
+                <label for="newActivity">Activity:</label>
+                <input type="text" id="newActivity" placeholder="Enter activity" required>
+                <label for="newDescription">Description:</label>
+                <input type="text" id="newDescription" placeholder="Enter description" required>
+                <label for="newPrice">Price:</label>
+                <input type="number" id="newPrice" placeholder="Enter price" required>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    
+
+    <div id="editPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup()">&times;</span>
+            <h2>Edit Value</h2>
+            <form id="editForm">
+                <label for="editValue">New Value:</label>
+                <input type="text" id="editValue" required>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <center>
+    <button onclick="openNewRecordForm()">Add New Record</button>
+    </center>
+
+    <h4>Click on <b>"Add New Record"</b> button to add a New Activity with a Description and a Price. <b>Right click</b> on the Activity, Description or Price if you need to edit them.<br />To <b>devide into paragraphs,</b> add new record with the same activity name.</h4>
+    <br>
+    <center>
+        <img src="example/activityData.png" height="300px" width="450px" /><img src="example/activityData2.png" height="300px" width="450px" />
+    </center>
+
+    <script>
+        async function addRecord(activity, description, price) {
+            try {
+                const response = await fetch('/api/activityData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ activity, description, price })
+                });
+                const data = await response.json();
+                if (data.message === 'Data saved successfully') {
+                    closeNewRecordForm();
+                    renderData();
+                }
+            } catch (error) {
+                console.error('Error adding record:', error);
+            }
+        }
+
+        function openNewRecordForm() {
+            const form = document.getElementById('newRecordForm');
+            form.style.display = 'block';
+        }
+
+        function closeNewRecordForm() {
+            const form = document.getElementById('newRecordForm');
+            form.style.display = 'none';
+        }
+
+        document.getElementById('newRecordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const activity = document.getElementById('newActivity').value;
+            const description = document.getElementById('newDescription').value;
+            const price = document.getElementById('newPrice').value;
+            addRecord(activity, description, price);
+            document.getElementById('newActivity').value = '';
+            document.getElementById('newDescription').value = '';
+            document.getElementById('newPrice').value = '';
+        });
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/activityData');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return [];
+            }
+        }
+
+        async function renderData() {
+    try {
+        const data = await fetchData();
+        const tbody = document.querySelector('#data-table tbody');
+        tbody.innerHTML = ''; // Clear previous content
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-id', item.id); // Set the data-id attribute to the record ID
+            Object.keys(item).forEach((key, index) => {
+                const cell = document.createElement('td');
+                cell.textContent = item[key];
+                // Exclude the first column (ID column) from being editable
+                if (index !== 0) {
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault(); // Prevent the default context menu
+                        openPopup(item.id, key, cell.textContent); // Open the edit popup
+                    });
+                }
+                row.appendChild(cell);
+            });
+            // Add delete action with icon on actions
+            const deleteCell = document.createElement('td');
+            const deleteIcon = document.createElement('i');
+            deleteIcon.classList.add('fas', 'fa-trash-alt');
+            deleteIcon.addEventListener('click', () => {
+                deleteRecord(item.id);
+            });
+            deleteCell.appendChild(deleteIcon);
+            row.appendChild(deleteCell);
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error rendering data:', error);
+    }
+}
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderData();
+        });
+
+        function openPopup(id, column, value) {
+            const popup = document.getElementById('editPopup');
+            const editValueInput = document.getElementById('editValue');
+            editValueInput.value = value;
+            popup.style.display = 'block';
+            // Add event listener to save button
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newValue = editValueInput.value;
+                const updatedData = await updateRecord(id, column, newValue);
+                if (updatedData) {
+                    closePopup();
+                    renderData();
+                }
+            });
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('editPopup');
+            popup.style.display = 'none';
+        }
+
+        async function updateRecord(id, column, newValue) {
+    try {
+        // Fetch the existing record data from the UI
+        const row = document.querySelector(`#data-table tbody tr[data-id="${id}"]`);
+        if (!row) {
+            console.error('Error updating record: Row not found');
+            return null;
+        }
+
+        // Existing record found, proceed with updating
+        const existingRecord = {
+            id: row.dataset.id,
+            activity: row.cells[1].textContent,
+            description: row.cells[2].textContent,
+            price: row.cells[3].textContent
+        };
+
+        // Merge the updated field with the existing record data
+        const updatedRecord = { ...existingRecord, [column]: newValue };
+
+        const response = await fetch(`/api/activityData/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedRecord) // Send the entire updated record data
+        });
+
+        const updatedData = await response.json();
+        return updatedData;
+    } catch (error) {
+        console.error('Error updating record:', error);
+        return null;
+    }
+}
+
+
+        async function deleteRecord(id) {
+            try {
+                const response = await fetch(`/api/activityData/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    renderData();
+                } else {
+                    console.error('Failed to delete record');
+                }
+            } catch (error) {
+                console.error('Error deleting record:', error);
+            }
+        }
+    </script>
+</body>
+</html>
