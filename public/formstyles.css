@@ -1,0 +1,99 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  form input,
+  form select,
+  form textarea {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  form input[type="number"],
+  form input[type="url"],
+  form input[type="text"],
+  form input[type="email"],
+  form input[type="tel"],
+  form input[type="date"] {
+    display: block;
+  }
+  
+  form select {
+    display: block;
+  }
+  
+  form textarea {
+    height: 100px;
+    resize: vertical;
+  }
+  
+  form button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  form button:hover {
+    background-color: #0056b3;
+  }
+  
+  #activities,
+  #cities {
+    margin-bottom: 20px;
+  }
+  
+  #activities > div,
+  #cities > div {
+    margin-bottom: 10px;
+  }
+  
+  #userID {
+    text-align: center;
+    font-weight: bold;
+    color: green;
+    margin-top: 20px;
+  }
+  
+  input:required, select:required, textarea:required {
+    border-left: 3px solid #ff0000;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  

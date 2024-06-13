@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Output</title>
+  <link rel="icon" type="image/x-icon" href="img/default.png">
+  <style>
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Output Page</h1>
+<p>Enjoy a cup of coffee while your document gets ready...</p>
+  <div id="outputData"></div>
+  <button id="downloadBtn" style="display: none;">Download Word Document</button>
+
+  <script>
+    async function loadOutput() {
+      let userID = prompt("Please enter your User ID:");
+
+      if (userID) {
+        try {
+          const response = await fetch(`/generateDocx/${userID}`, { method: 'POST' });
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${userID}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+          } else {
+            const errorMessage = await response.text();
+            console.error('Error generating document:', errorMessage);
+            alert('Error generating document. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error fetching output data:', error);
+          alert('Error fetching data. Please try again.');
+        }
+      } else {
+        alert('No User ID provided.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOutput);
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EuroLanka DB - Home</title>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/x-icon" href="img/defualt.png">
+    <link rel="icon" type="image/x-icon" href="img/default.png">
 </head>
 <body>
 
@@ -21,6 +21,21 @@
     <center>
         <button onclick="cityData()">City Data Management</button>
     </center>
+
+    <br />
+    <center>
+        <button onclick="hotelData()">Hotel Data Management</button>
+    </center>
+
+    <br />
+    <center>
+        <button onclick="formRep()" id="green">Create an Itinerary Plan</button>
+    </center>
+
+    <br />
+    <center>
+        <button onclick="logoutRep()" id="redred">Logout</button>
+    </center>
     
     <script>
         function activityData(){
@@ -29,6 +44,18 @@
 
         function cityData(){
             document.location.replace("/cityData");
+        }
+
+        function hotelData(){
+            document.location.replace("/hotelData");
+        }
+
+        function formRep(){
+            document.location.replace("/form");
+        }
+
+        function logoutRep(){
+            document.location.replace("/logout");
         }
     </script>
 </body>

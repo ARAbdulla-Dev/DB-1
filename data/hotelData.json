@@ -1,0 +1,20 @@
+[
+  {
+    "id": "8791accb-12be-44b0-a166-40f6c2901ac7",
+    "city": "Galle",
+    "type": "Star ",
+    "name": "5 Star Hotel Galle, 3 Star Hotel Galle"
+  },
+  {
+    "id": "2de7b27e-547c-4d43-b8cb-fcc7fc84a084",
+    "city": "Matara",
+    "type": "Star ",
+    "name": "5 Star Hotel Matara, Matara hotel 24"
+  },
+  {
+    "id": "0420291d-09de-4cd9-a174-c70a548a976a",
+    "city": "Matara",
+    "type": "Guest House",
+    "name": "5 Guset House Matara, Matara Guset House"
+  }
+]

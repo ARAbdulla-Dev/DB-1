@@ -2,28 +2,196 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { promisify } = require('util');
+const PizZip = require('pizzip');
+const Docxtemplater = require('docxtemplater');
+const ImageModule = require('docxtemplater-image-module-free');
+const jwt = require('jsonwebtoken');
+const connectToWhatsApp = require('./base');
+const bodyParser = require('body-parser');
+const cors = require("cors");
+const cookieSession = require("cookie-session");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+
+app.use(cors());
+
+// parse requests of content-type - application/json
 app.use(express.json());
-app.use(express.static('public'));
 
+// parse requests of content-type - application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+let sock; // Declare sock at the module level
+
+// Function to establish WhatsApp connection
+async function WPconnection() {
+    const { sock: whatsappSock } = await connectToWhatsApp();
+    sock = whatsappSock; // Assign the sock variable from the connection to the module-level sock variable
+}
+
+// Call the WPconnection function to establish the WhatsApp connection
+WPconnection();
+
+// Set up cookie session middleware
+app.use(cookieSession({
+    name: 'session',
+    keys: ['key1', 'key2'],
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
+const users = JSON.parse(fs.readFileSync('data/phoneNumbers.json', 'utf8'));
+const otpStore = {}; // To store OTPs temporarily
+
+// Serve static files
+//app.use(express.static(path.join(__dirname, 'public')));
+
+// Middleware to check authentication
+const isAuthenticated = (req, res, next) => {
+    if (req.session.isLoggedIn) {
+        return next();
+    }
+    res.redirect('/');
+};
+
+// Serve login.html at the root route
 app.get('/', (req, res) => {
-    res.sendFile(`${__dirname}/public/index.html`);
+    if (req.session.isLoggedIn) {
+        return res.redirect('/home');
+    }
+    return res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.get('/activityData', (req, res) => {
-    res.sendFile(`${__dirname}/public/activityData.html`);
+// Login route
+app.post('/login', async (req, res) => {
+    const { email } = req.body;
+
+    const user = users.find(user => user.email === email);
+    if (!user) {
+        return res.status(400).send('User not found');
+    }
+
+    const otp = generateOTP();
+    otpStore[email] = otp;
+
+    try {
+        // Ensure sock is defined before using it
+        if (!sock) {
+            throw new Error('WhatsApp connection is not established');
+        }
+
+        // Send OTP using Baileys (WhatsApp)
+        sock.sendMessage(user.phoneNumber, { text: `Your OTP(One-time-password) for *EuroLanka-DB* is *${otp}*\n\nPlease do not share this code with anyone. Ignore this if you did not requested for it.` });
+
+        // You can also send OTP via email if required using nodemailer
+
+        res.send('OTP sent');
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).send('Error sending OTP');
+    }
 });
 
-app.get('/cityData', (req, res) => {
-    res.sendFile(`${__dirname}/public/cityData.html`);
+// Verify OTP route
+app.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    const storedOTP = otpStore[email];
+
+    if (!storedOTP || storedOTP !== otp) {
+        return res.status(400).send('Invalid OTP');
+    }
+
+    req.session.isLoggedIn = true;
+    req.session.email = email;
+    delete otpStore[email];
+
+    const token = jwt.sign({ email }, 'secret_key');
+
+    res.send({ token });
 });
+
+// Serve protected routes
+app.get('/home', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/form', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'form.html'));
+});
+
+app.get('/cityData', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'cityData.html'));
+});
+
+app.get('/hotelData', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'hotelData.html'));
+});
+
+app.get('/activityData', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'activityData.html'));
+});
+
+app.get('/output', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'output.html'));
+});
+
+
+// Logout route
+app.get('/logout', (req, res) => {
+    req.session = null;
+    res.redirect('/');
+});
+
+app.get('/styles.css', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'styles.css'));
+});
+
+app.get('/formstyles.css', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'formstyles.css'));
+});
+
+app.get('/script.js', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'script.js'));
+});
+
+app.get('/img/default.png', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'img', 'default.png'));
+});
+
+
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+app.use('/example', express.static(path.join(__dirname, 'public', 'example')));
+
+
+
+// Generate a random 6-digit OTP
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+        const readFileAsync = promisify(fs.readFile);
+const writeFileAsync = promisify(fs.writeFile);
+
+//app.use(express.static('public'));
+
+/*
+// Serve form.html at the /form route
+app.get('/form', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'form.html'));
+  });
+  
+  // Serve output.html at the /form route
+  app.get('/output', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'output.html'));
+  });
+  */
 
 
 const activityDB = path.join(__dirname, 'data', 'activityData.json');
 const cityDB = path.join(__dirname, 'data', 'cityData.json');
+const hotelDB = path.join(__dirname, 'data', 'hotelData.json');
 
 // =======================================================================================================
 // Create data directory if not exists
@@ -202,6 +370,266 @@ app.delete('/api/cityData/:id', (req, res) => {
 });
 
 // =======================================================================================================
+
+// Create data directory if not exists
+if (!fs.existsSync(path.dirname(hotelDB))) {
+    fs.mkdirSync(path.dirname(hotelDB), { recursive: true });
+}
+
+app.get('/api/hotelData', (req, res) => {
+    fs.readFile(hotelDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+        res.status(200).json(JSON.parse(data));
+    });
+});
+
+app.post('/api/hotelData', (req, res) => {
+    const { city, type, name } = req.body;
+    const id = uuidv4();
+    const newRecord = { id, city, type, name };
+
+    fs.readFile(hotelDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        const jsonData = JSON.parse(data);
+        jsonData.push(newRecord);
+
+        fs.writeFile(hotelDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Data saved successfully', id });
+        });
+    });
+});
+
+app.put('/api/hotelData/:id', (req, res) => {
+    const id = req.params.id;
+    const  {city, type, name } = req.body;
+
+    fs.readFile(hotelDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        let jsonData = JSON.parse(data);
+        const index = jsonData.findIndex(item => item.id === id);
+        if (index === -1) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        jsonData[index] = { id, city, type, name };
+
+        fs.writeFile(hotelDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Data updated successfully' });
+        });
+    });
+});
+
+app.delete('/api/hotelData/:id', (req, res) => {
+    const id = req.params.id;
+
+    fs.readFile(hotelDB, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading data file' });
+        }
+
+        let jsonData = JSON.parse(data);
+        const index = jsonData.findIndex(item => item.id === id);
+        if (index === -1) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        jsonData.splice(index, 1);
+
+        fs.writeFile(hotelDB, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error writing to data file' });
+            }
+            res.status(200).json({ message: 'Record deleted successfully' });
+        });
+    });
+});
+// =======================================================================================================
+
+
+app.get('/api/def', (req, res) => {
+    const filePath = path.join(__dirname, 'data', 'default.json');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        res.status(500).send('Error reading file');
+        return;
+      }
+      res.json(JSON.parse(data));
+    });
+  });
+  
+  app.post('/save', (req, res) => {
+    const userID = uuidv4().slice(0, 10);
+    const dataPath = path.join(__dirname, 'data', `${userID}.json`);
+  
+    fs.writeFile(dataPath, JSON.stringify(req.body, null, 2), (err) => {
+      if (err) {
+        res.status(500).send('Error saving data');
+        return;
+      }
+      res.json({ userID });
+    });
+  });
+  
+  // Endpoint to list and serve all data files
+  app.get('/data', (req, res) => {
+      const dataDir = path.join(__dirname, 'data');
+      
+      fs.readdir(dataDir, (err, files) => {
+        if (err) {
+          res.status(500).send('Error reading data directory');
+          return;
+        }
+    
+        const fileContents = files.map((file) => {
+          const filePath = path.join(dataDir, file);
+          const content = fs.readFileSync(filePath, 'utf8');
+          return { fileName: file, content: JSON.parse(content) };
+        });
+    
+        res.json(fileContents);
+      });
+    });
+    
+  
+    // Endpoint to list and serve all data files
+  app.get('/data/:userID', (req, res) => {
+    const { userID } = req.params;
+    const dataDir = path.join(__dirname, 'data');
+    const filePath = path.join(dataDir, `${userID}.json`);
+  
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        res.status(404).json({ error: 'No data found for the provided User ID.' });
+        return;
+      }
+      try {
+        const jsonData = JSON.parse(data);
+        res.json(jsonData);
+      } catch (error) {
+        console.error('Error parsing JSON data:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+  });
+  
+  app.post('/generateDocx/:userID', async (req, res) => {
+    try {
+        const userID = req.params.userID;
+        const jsonFilePath = path.join(__dirname, 'data', `${userID}.json`);
+        const templateFilePath = path.join(__dirname, 'public', 'temp.docx');
+        const outputFilePath = path.join(__dirname, 'data', `${userID}.docx`);
+  
+        // Check if JSON file exists
+        if (!fs.existsSync(jsonFilePath)) {
+            return res.status(404).send('JSON file not found.');
+        }
+  
+        // Read the JSON data
+        const jsonData = await readFileAsync(jsonFilePath, 'utf-8');
+        const data = JSON.parse(jsonData);
+  
+        // Generate Word document with the provided data
+        await generateWordDocument(jsonFilePath, templateFilePath, outputFilePath, data);
+  
+        // Send the generated file to the client for download
+        res.download(outputFilePath, `${userID}.docx`, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+            } else {
+                console.log('File sent successfully.');
+            }
+        });
+    } catch (error) {
+        console.error('Error generating Word document:', error);
+        res.status(500).send('Internal Server Error');
+    }
+  });
+  
+  
+  async function generateWordDocument(jsonFilePath, templateFilePath, outputFilePath, data) {
+    try {
+      // Read the Word template
+      const templateData = await readFileAsync(templateFilePath, 'binary');
+      const zip = new PizZip(templateData);
+      const docx = new Docxtemplater().loadZip(zip);
+  
+      // Configure image module
+      const imageOpts = {
+        centered: true, // Set to true if you want images to be centered
+        getImage: (tagValue) => tagValue, // Use the tag value as the image path
+        getSize: () => [300, 200], // Set the size of the image [width, height]
+      };
+      const imageModule = new ImageModule(imageOpts);
+      docx.attachModule(imageModule); // Attach the image module to Docxtemplater
+  
+      // Preprocess data to make it template-friendly
+      const travelDays = [];
+      const travelTbEntries = data.travelTb.travelDay.map((day, index) => ({
+        day,
+        activity: data.travelTb.activity[index]
+      }));
+  
+      Object.keys(data).forEach((key) => {
+        if (key.startsWith('Day')) {
+          const dayNumber = key.slice(3); // Extract the day number from the key
+          const activity = data.travelTb.activity[parseInt(dayNumber) - 1]; // Get the corresponding activity
+          travelDays.push({
+            day: key,
+            date: data[key].date,
+            description: data[key].description,
+            meals: data[key].meals,
+            hotel: data[key].hotel,
+            activity: activity, // Add activity to the travel day object
+          });
+        }
+      });
+  
+      // Preprocess data to make accommodations template-friendly
+      const accommodations = [];
+      Object.entries(data.accommodations).forEach(([city, hotel]) => {
+        accommodations.push({ city, hotel });
+      });
+  
+      // Set the data into the template
+      docx.setData({
+        ...data,
+        travelDays: travelDays,
+        accommodationsEntries: accommodations,
+        travelTbEntries: travelTbEntries
+      });
+  
+      // Render the document (replace all occurrences of {placeholder} by the corresponding data)
+      docx.render();
+  
+      // Write the output file
+      const buffer = docx.getZip().generate({ type: 'nodebuffer' });
+      await writeFileAsync(outputFilePath, buffer);
+  
+      console.log('Word document generated successfully.');
+    } catch (error) {
+      console.error('Error generating Word document:', error);
+      throw error;
+    }
+  }
+
+
+  //======================================================================================================
+
+   
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
