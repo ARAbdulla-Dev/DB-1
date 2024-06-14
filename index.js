@@ -7,10 +7,10 @@ const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const ImageModule = require('docxtemplater-image-module-free');
 const jwt = require('jsonwebtoken');
-const connectToWhatsApp = require('./base');
 const bodyParser = require('body-parser');
 const cors = require("cors");
 const cookieSession = require("cookie-session");
+const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,17 +23,6 @@ app.use(express.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
-
-let sock; // Declare sock at the module level
-
-// Function to establish WhatsApp connection
-async function WPconnection() {
-    const { sock: whatsappSock } = await connectToWhatsApp();
-    sock = whatsappSock; // Assign the sock variable from the connection to the module-level sock variable
-}
-
-// Call the WPconnection function to establish the WhatsApp connection
-WPconnection();
 
 // Set up cookie session middleware
 app.use(cookieSession({
@@ -75,17 +64,12 @@ app.post('/login', async (req, res) => {
 
     const otp = generateOTP();
     otpStore[email] = otp;
+    const phoneNumber = user.phoneNumber
+    const Smessage = `*EuroLanka DB*\n\nYour OTP (One-time-password) for EuroLanka DB Login is,\n*${otp}* \n\nPlease do not share this code with anyone. Ignore this code if you did not requested for it.\n\nPOWRED BY WA-MAIL`
 
     try {
-        // Ensure sock is defined before using it
-        if (!sock) {
-            throw new Error('WhatsApp connection is not established');
-        }
-
-        // Send OTP using Baileys (WhatsApp)
-        sock.sendMessage(user.phoneNumber, { text: `Your OTP(One-time-password) for *EuroLanka-DB* is *${otp}*\n\nPlease do not share this code with anyone. Ignore this if you did not requested for it.` });
-
-        // You can also send OTP via email if required using nodemailer
+        // Send OTP via the baileysotp service
+        await axios.post('https://baileysotp.onrender.com/message', { phoneNumber, otp, Smessage });
 
         res.send('OTP sent');
     } catch (error) {
