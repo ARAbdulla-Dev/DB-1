@@ -6,6 +6,8 @@
   <title>Tour Form</title>
   <link rel="stylesheet" href="formstyles.css">
   <link rel="icon" type="image/x-icon" href="img/default.png">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <script>
     const activities = [];
     const cities = [];
@@ -285,6 +287,9 @@
 </head>
 <body>
   <h1>Tour Form</h1>
+  <div class="back-button" onclick="document.location.replace('/')">
+    <i class="fas fa-arrow-left"></i>
+</div>
   <form id="tourForm">
     <label for="numDays">Tour Duration (Number of Days):</label>
     <input type="number" id="numDays" name="numDays" required><br>
