@@ -3,20 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Data Management</title>
+    <title>EuroLanka | Itinerary Maker</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="nav.css" />
     <link rel="icon" type="image/x-icon" href="img/default.png">
+    
 </head>
 <body>
-    <h1>Activity Data Management</h1>  
-    <center>
-    <i class="fas fa-tree"></i>
-    </center>
+    <div class="nav">
+        <div class="logo">
+        <img src="img/default.png" height="45px" />
+        <h3>EuroLanka Itinerary Maker</h3>
+        </div>
+
+        <img src="img/logout.png" id="logout" onclick="document.location.replace('/logout')" />
+    </div>
+    <br />
+    <div class="boo">
+        <img src="img/acdb.png" />
+    <h1>Activity Data Management</h1>
+    </div>
+
+    <br /><br /><br />
     <div class="back-button" onclick="document.location.replace('/')">
         <i class="fas fa-arrow-left"></i>
     </div>
+
     <div id="app">
         <table id="data-table">
             <thead>
@@ -34,6 +47,8 @@
         </table>
     </div>
 
+    <div class="overlay"></div>
+
     <div id="newRecordForm" style="display: none;">
         <div class="popup-content">
             <span class="close-popup" onclick="closeNewRecordForm()">&times;</span>
@@ -49,7 +64,6 @@
             </form>
         </div>
     </div>
-    
 
     <div id="editPopup" class="popup" style="display: none;">
         <div class="popup-content">
@@ -63,15 +77,17 @@
         </div>
     </div>
 
+    <br />
     <center>
-    <button onclick="openNewRecordForm()">Add New Record</button>
+        <button onclick="openNewRecordForm()">Add New Record</button>
     </center>
 
-    <h4>Click on <b>"Add New Record"</b> button to add a New Activity with a Description and a Price. <b>Right click</b> on the Activity, Description or Price if you need to edit them.<br />To <b>devide into paragraphs,</b> add new record with the same activity name.</h4>
-    <br>
-    <center>
-        <img src="example/activityData.png" height="300px" width="450px" /><img src="example/activityData2.png" height="300px" width="450px" />
-    </center>
+    <br /><br />
+
+    <div class="bottom">
+        &copy; <a href="https://eurolanka.net/">EuroLanka Travel</a> 2024. All Rights Reserved.
+    </div>
+
 
     <script>
         async function addRecord(activity, description, price) {
@@ -96,11 +112,19 @@
         function openNewRecordForm() {
             const form = document.getElementById('newRecordForm');
             form.style.display = 'block';
+
+            const layer = document.querySelector('.overlay');
+            layer.style.display = 'block';
+
         }
 
         function closeNewRecordForm() {
             const form = document.getElementById('newRecordForm');
             form.style.display = 'none';
+
+            const layer = document.querySelector('.overlay');
+            layer.style.display = 'none';
+
         }
 
         document.getElementById('newRecordForm').addEventListener('submit', async (e) => {
@@ -173,6 +197,10 @@
             editValueInput.value = value;
             popup.style.display = 'block';
             // Add event listener to save button
+
+            const layer = document.querySelector('.overlay');
+            layer.style.display = 'block';
+
             document.getElementById('editForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const newValue = editValueInput.value;
@@ -187,6 +215,9 @@
         function closePopup() {
             const popup = document.getElementById('editPopup');
             popup.style.display = 'none';
+
+            const layer = document.querySelector('.overlay');
+            layer.style.display = 'none';
         }
 
         async function updateRecord(id, column, newValue) {
@@ -241,5 +272,6 @@
             }
         }
     </script>
-</body>
+
+    </body>
 </html>

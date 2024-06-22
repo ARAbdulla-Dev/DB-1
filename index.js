@@ -65,7 +65,12 @@ app.post('/login', async (req, res) => {
     const otp = generateOTP();
     otpStore[email] = otp;
     const phoneNumber = user.phoneNumber
-    const Smessage = `*EuroLanka DB*\n\nYour OTP (One-time-password) for EuroLanka DB Login is,\n*${otp}* \n\nPlease do not share this code with anyone. Ignore this code if you did not requested for it.\n\nPOWRED BY WA-MAIL`
+    const Smessage = `*OTP code for EuroLanka - Itinerary Maker is,* 
+
+${mono}• ${otp}${mono}
+
+> Don't share this code with others.
+> Powered by Z'MAIL`
 
     try {
         // Send OTP via the baileysotp service
@@ -128,6 +133,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+/*
 app.get('/styles.css', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'styles.css'));
 });
@@ -142,11 +148,12 @@ app.get('/script.js', isAuthenticated, (req, res) => {
 
 app.get('/img/default.png', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'img', 'default.png'));
-});
+});*/
 
 
-app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
-app.use('/example', express.static(path.join(__dirname, 'public', 'example')));
+//app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+//app.use('/example', express.static(path.join(__dirname, 'public', 'example')));
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 
 
@@ -546,6 +553,10 @@ app.get('/api/def', (req, res) => {
   
   async function generateWordDocument(jsonFilePath, templateFilePath, outputFilePath, data) {
     try {
+      // Read JSON data
+      const jsonData = await readFileAsync(jsonFilePath, 'utf-8');
+      const data = JSON.parse(jsonData);
+  
       // Read the Word template
       const templateData = await readFileAsync(templateFilePath, 'binary');
       const zip = new PizZip(templateData);
@@ -553,14 +564,14 @@ app.get('/api/def', (req, res) => {
   
       // Configure image module
       const imageOpts = {
-        centered: true, // Set to true if you want images to be centered
-        getImage: (tagValue) => tagValue, // Use the tag value as the image path
-        getSize: () => [300, 200], // Set the size of the image [width, height]
+        centered: true,
+        getImage: (tagValue) => tagValue,
+        getSize: () => [300, 200],
       };
       const imageModule = new ImageModule(imageOpts);
-      docx.attachModule(imageModule); // Attach the image module to Docxtemplater
+      docx.attachModule(imageModule);
   
-      // Preprocess data to make it template-friendly
+      // Preprocess travel days data
       const travelDays = [];
       const travelTbEntries = data.travelTb.travelDay.map((day, index) => ({
         day,
@@ -569,34 +580,40 @@ app.get('/api/def', (req, res) => {
   
       Object.keys(data).forEach((key) => {
         if (key.startsWith('Day')) {
-          const dayNumber = key.slice(3); // Extract the day number from the key
-          const activity = data.travelTb.activity[parseInt(dayNumber) - 1]; // Get the corresponding activity
+          const dayNumber = key.slice(3);
+          const activity = data.travelTb.activity[parseInt(dayNumber) - 1];
+  
           travelDays.push({
             day: key,
             date: data[key].date,
             description: data[key].description,
             meals: data[key].meals,
             hotel: data[key].hotel,
-            activity: activity, // Add activity to the travel day object
+            activity: activity,
           });
         }
       });
   
       // Preprocess data to make accommodations template-friendly
-      const accommodations = [];
-      Object.entries(data.accommodations).forEach(([city, hotel]) => {
-        accommodations.push({ city, hotel });
+      const accommodationsEntries = [];
+      Object.keys(data).forEach((key) => {
+        if (key.startsWith('Day')) {
+          accommodationsEntries.push({
+            city: data[key].hotelCity,
+            hotel: data[key].hotel
+          });
+        }
       });
   
       // Set the data into the template
       docx.setData({
         ...data,
         travelDays: travelDays,
-        accommodationsEntries: accommodations,
-        travelTbEntries: travelTbEntries
+        accommodationsEntries: accommodationsEntries,
+        travelTbEntries: travelTbEntries,
       });
   
-      // Render the document (replace all occurrences of {placeholder} by the corresponding data)
+      // Render the document
       docx.render();
   
       // Write the output file
@@ -609,8 +626,6 @@ app.get('/api/def', (req, res) => {
       throw error;
     }
   }
-
-
   //======================================================================================================
 
    

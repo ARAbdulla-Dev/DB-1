@@ -3,157 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>EuroLanka | Login</title>
     <link rel="icon" type="image/x-icon" href="img/default.png">
-
-    <style>
-        /* login.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.container {
-    width: 300px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    margin-top: 0;
-    text-align: center;
-    color: #333;
-}
-
-label {
-    display: block;
-    margin-bottom: 10px;
-    color: #555;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* logout.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.container {
-    text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    margin-top: 0;
-    color: #333;
-}
-
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-    </style>
+    <link href="lstyles.css" rel="stylesheet" />
 </head>
 <body>
+    <br /><br /><br /><br /><br />
+    <div class="container">
     <form id="loginForm">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <button type="submit">Send OTP</button>
+        <br />
+        <center>
+        <img src="img/default.png" height="210px" />
+        </center>
+        <h1>Login</h1>
+        <h3>Login to get started with making itineraries!</h3>
+        <center>
+        <input type="email" id="email" name="email" placeholder="Email" required>
+        <br /><br />
+        <button type="submit">Login</button>
+        </center>
     </form>
 
     <form id="otpForm" style="display: none;">
-        <label for="otp">OTP:</label>
-        <input type="text" id="otp" name="otp" required>
-        <button type="submit">Verify OTP</button>
+        <br />
+        <center>
+            <img src="img/default.png" height="210px" />
+        </center>
+        <h1>Login</h1>
+        <h3>Enter the OTP sent to your phone number!</h3>
+        <center>
+        <input type="text" id="otp" name="otp" placeholder="OTP" required>
+        <br /><br />
+        <button type="submit">Verify</button>
+        </center>
     </form>
+    </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
+    <div class="bottom">
+        &copy; <a href="https://eurolanka.net/">EuroLanka Travel</a> 2024. All Rights Reserved.
+    </div>
 
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
 
-            if (response.ok) {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('otpForm').style.display = 'block';
-            } else {
-                alert('Failed to send OTP');
-            }
-        });
-
-        document.getElementById('otpForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const otp = document.getElementById('otp').value;
-            const email = document.getElementById('email').value;
-
-            const response = await fetch('/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('token', data.token);
-                //alert('Login successful');
-                document.location.replace('/home');
-                
-            } else {
-                alert('Invalid OTP');
-            }
-        });
+    <script src="lscripts.js">
     </script>
 </body>
 </html>

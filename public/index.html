@@ -3,60 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EuroLanka DB - Home</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>EuroLanka | Itinerary Maker</title>
     <link rel="icon" type="image/x-icon" href="img/default.png">
+    <link rel="stylesheet" href="istyles.css" />
 </head>
 <body>
-
-    <br /><br />
-
-    <h1>EuroLanka Database - Home</h1>
+    <br /><br /><br />
+    <h1>Welcome to EuroLanka Tour<br /> Itinerary Maker!</h1>
+    <h3>Here you will be able to easily make tour itinerary plans...</h3>
     <br />
+
     <center>
-        <button onclick="activityData()">Activity Data Management</button>
+    <div class="box" id="one">
+        <br /><br />
+        <img src="img/database-management.png" height="110px" width="106px" />
+        <h4>Database Manager</h4>
+    </div>
+    <div class="box" id="two"  onclick="document.location.replace('/form')">
+        <br /><br />
+        <img src="img/google-forms.png" height="110px" width="106px" />
+        <h4>Generate Itinerary</h4>
+    </div>
+
+    <div class="overlay"></div>
+    <div class="popup">
+        <div class="close">
+            X
+        </div>
+        <h4>Database Manager</h4>
+        <div class="db" onclick="document.location.replace('/activityData')">
+        
+        <h5>Activity Database</h5>
+        <img src="img/acdb.png" id="yoo" />
+       </div>
+       <!--
+       <div class="db" onclick="document.location.replace('/cityData')">
+
+        <h5>City Database</h5>
+        <img src="img/cdb.png" id="yoo" />
+       </div>
+
+        -->
+
+      <div class="db" onclick="document.location.replace('/hotelData')">
+        
+        <h5>Hotel Database</h5>
+        <img src="img/hdb.png" id="yoo" />
+       </div> 
+       
+    </div>
+
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+    <img src="img/logout.png" height="50px" id="logout" onclick="document.location.replace('/logout')" />
     </center>
 
-    <br />
-    <center>
-        <button onclick="cityData()">City Data Management</button>
-    </center>
+    <div class="bottom">
+        &copy; <a href="https://eurolanka.net/">EuroLanka Travel</a> 2024. All Rights Reserved.
+    </div>
 
-    <br />
-    <center>
-        <button onclick="hotelData()">Hotel Data Management</button>
-    </center>
 
-    <br />
-    <center>
-        <button onclick="formRep()" id="green">Create an Itinerary Plan</button>
-    </center>
 
-    <br />
-    <center>
-        <button onclick="logoutRep()" id="redred">Logout</button>
-    </center>
-    
-    <script>
-        function activityData(){
-            document.location.replace("/activityData");
-        }
 
-        function cityData(){
-            document.location.replace("/cityData");
-        }
+    <script src="iscripts.js">
 
-        function hotelData(){
-            document.location.replace("/hotelData");
-        }
-
-        function formRep(){
-            document.location.replace("/form");
-        }
-
-        function logoutRep(){
-            document.location.replace("/logout");
-        }
     </script>
+    
+    
 </body>
 </html>

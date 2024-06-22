@@ -3,11 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Output</title>
+  <title>EuroLanka | Itinerary Maker</title>
   <link rel="icon" type="image/x-icon" href="img/default.png">
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  
   <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Joti+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jockey+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+    body{
+      margin: 0px;
+      background:url('img/bg.jpg');
+    }
     pre {
       background-color: #f4f4f4;
       padding: 10px;
@@ -15,36 +25,142 @@
       border-radius: 5px;
     }
 
-    .back-button {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background-color: #007bff;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 50px;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
+    .fa-coffee{
+      font-size: 6em;
+      color:brown;
+      padding: 12px;
+      padding-top: 17px;
+      padding-bottom: 17px;
+      border-radius: 100%;
+    }
+    .nav{
+  width: 100%;
+  height: 50px;
+  background-color: #fff;
+  position: fixed;
+  border: 1px #c8c8c8 solid;
+  margin-left: 0px;
+  margin-top: 0px;
+}
+
+.nav img{
+  margin-top: 2.5px;
+  margin-left: 5px;
+}
+
+.nav h3{
+  margin-left: 60px;
+  margin-top: -36px;
+  font-family: "Chivo", sans-serif;
+  font-weight: 400;
+}
+
+.logo{
+  cursor: pointer;
+  width: 320px;
+}
+
+#logout{
+  height: 33px;
+  margin-top: -49px;
+  right: 10px;
+  position: absolute;
+  cursor: pointer;
+}
+.bottom{
+    position: fixed;
+    bottom: 0px;
+    text-align: center;
+    background-color: #4b4b4b;
+    margin: -8px;
+    padding-top: 3px;
+    margin-bottom: 0.1px;
+    padding-bottom: 3px;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    width: 100%;
+    padding-right: 8px;
+}
+
+.bottom a{
+    color: cornflowerblue;
+    text-decoration: none;
+}
+
+.boo h1{
+  font-size: 0.9em;
+  font-family: "Chivo", sans-serif;
+  font-weight: 600;
+  margin-left: 38px;
+  margin-top: -25px;
+}
+
+.boo{
+  background-color: #fff;
+  position: fixed;
+  border: 1px #c8c8c8 solid;
+  width: 100%;
+  height: 24px;
+  margin-top: 31px;
+}
+
+.boo img{
+  height: 25px;
+  margin-left: 9px;
+}
+
+h1{
+  font-family:'Joti One', 'sans-serif';
+}
+
+.container{
+  background-color: #fff;
+  margin: 0px auto;
+  text-align: center;
+  border-radius: 25px;
+  padding: 10px;
+  padding-bottom: 40px;
+  width: 50%;
+  margin-top: 100px;
+}
+
+p{
+  font-family: 'Jockey One', 'sans-serif';
+  margin-top: -15px;
+  color: #4b4b4b;
+}
 
   </style>
 </head>
 <body>
-  <div class="back-button" onclick="document.location.replace('/')">
-    <i class="fas fa-arrow-left"></i>
-</div>
-  <h1>Output Page</h1>
-<p>Enjoy a cup of coffee while your document gets ready...</p>
-  <div id="outputData"></div>
-  <button id="downloadBtn" style="display: none;">Download Word Document</button>
 
+  <div class="nav">
+    <div class="logo">
+    <img src="img/default.png" height="45px" />
+    <h3>EuroLanka Itinerary Maker</h3>
+    </div>
+
+    <img src="img/logout.png" id="logout" onclick="document.location.replace('/logout')" />
+</div>
+<br />
+<div class="boo">
+    <img src="img/google-forms.png" />
+<h1>Form Output</h1>
+</div>
+
+<br /><br /><br />
+
+<div class="container">
+  <h1>Form Output</h1>
+<p>Enjoy a cup of coffee while your document gets ready...</p>
+<i class="fa fa-coffee" aria-hidden="true"></i>
+  <div id="outputData"></div>
+</div>
+
+  <div class="bottom">
+    &copy; <a href="https://eurolanka.net/">EuroLanka Travel</a> 2024. All Rights Reserved.
+</div>
   <script>
-    async function loadOutput() {
+  /*  async function loadOutput() {
       let userID = prompt("Please enter your User ID:");
 
       if (userID) {
@@ -74,6 +190,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', loadOutput);
+    */
   </script>
 </body>
 </html>

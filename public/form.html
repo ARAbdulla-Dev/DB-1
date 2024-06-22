@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tour Form</title>
+  <title>EuroLanka | Itinerary Maker</title>
   <link rel="stylesheet" href="formstyles.css">
   <link rel="icon" type="image/x-icon" href="img/default.png">
   
@@ -12,44 +12,52 @@
     const activities = [];
     const cities = [];
     const hotelData = [];
-    const mealsOptions = ["(B /L /D)", "(B /- /-)", "(- /L /-)", "(- /- /D)", "(B /L /-)", "(B /- /D)", "(- /L /D)"];
+    const mealsOptions = ["(B /L /D)", "(B /- /-)", "(- /L /-)", "(- /- /D)", "(B /L /-)", "(B /- /D)", "(- /L /D)","(- /- /-)"];
     let defaultValues = {};
 
     async function fetchOptions() {
-      try {
-        const activityRes = await fetch('/api/activityData');
-        const cityRes = await fetch('/api/cityData');
-        const defRes = await fetch('/api/def');
-        const hotelRes = await fetch('/api/hotelData');
-        
-        const activityData = await activityRes.json();
-        const cityData = await cityRes.json();
-        const defData = await defRes.json();
-        const hotelDataRes = await hotelRes.json();
+  try {
+    const activityRes = await fetch('/api/activityData');
+    const defRes = await fetch('/api/def');
+    const cityRes = await fetch('/api/cityData'); // Ensure you have an endpoint for city data
+    const hotelRes = await fetch('/api/hotelData');
 
-        activityData.forEach(activity => activities.push(activity));
-        cityData.forEach(city => cities.push(city));
-        hotelDataRes.forEach(hotel => hotelData.push(hotel));
-        defaultValues = defData[0];
+    const activityData = await activityRes.json();
+    const defData = await defRes.json();
+    const cityData = await cityRes.json(); // Fetch city data correctly
+    const hotelDataRes = await hotelRes.json();
 
-        document.getElementById('address').value = defaultValues.address;
-        document.getElementById('phone').value = defaultValues.phone;
-        document.getElementById('email').value = defaultValues.email;
-        document.getElementById('web').value = defaultValues.web;
+    // Populate activities array
+    activityData.forEach(activity => activities.push(activity));
 
-        // Make the default fields read-only
-        document.getElementById('address').readOnly = true;
-        document.getElementById('phone').readOnly = true;
-        document.getElementById('email').readOnly = true;
-        document.getElementById('web').readOnly = true;
-      } catch (error) {
-        console.error('Error fetching options:', error);
-      }
-    }
+    // Populate cities array
+    cityData.forEach(city => cities.push(city));
+
+    // Populate hotelData array
+    hotelDataRes.forEach(hotel => hotelData.push(hotel));
+
+    // Get default values
+    defaultValues = defData[0];
+
+    // Populate the input fields with default values
+    document.getElementById('address').value = defaultValues.address;
+    document.getElementById('phone').value = defaultValues.phone;
+    document.getElementById('email').value = defaultValues.email;
+    document.getElementById('web').value = defaultValues.web;
+
+    // Make the default fields read-only
+    document.getElementById('address').readOnly = true;
+    document.getElementById('phone').readOnly = true;
+    document.getElementById('email').readOnly = true;
+    document.getElementById('web').readOnly = true;
+  } catch (error) {
+    console.error('Error fetching options:', error);
+  }
+}
 
     function populateActivityOptions(dayIndex) {
       const select = document.getElementById(`activity-${dayIndex}`);
-      select.innerHTML = ''; // Clear previous options
+      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
       activities.forEach(activity => {
         const option = document.createElement('option');
         option.value = activity.activity;
@@ -60,7 +68,7 @@
 
     function populateMealsOptions(dayIndex) {
       const select = document.getElementById(`meals-${dayIndex}`);
-      select.innerHTML = ''; // Clear previous options
+      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
       mealsOptions.forEach(meal => {
         const option = document.createElement('option');
         option.value = meal;
@@ -71,7 +79,7 @@
 
     function populateCityOptions(cityIndex) {
       const select = document.getElementById(`city-${cityIndex}`);
-      select.innerHTML = ''; // Clear previous options
+      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
       cities.forEach(city => {
         const option = document.createElement('option');
         option.value = city.city;
@@ -83,7 +91,7 @@
     function populateAccommodationOptions(cityIndex) {
       const citySelect = document.getElementById(`city-${cityIndex}`);
       const accommodationSelect = document.getElementById(`accommodation-${cityIndex}`);
-      accommodationSelect.innerHTML = '';
+      accommodationSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
 
       const selectedCity = citySelect.value;
       const city = cities.find(city => city.city === selectedCity);
@@ -98,6 +106,8 @@
       }
     }
 
+
+
     function createActivityFields(numDays) {
       const activitiesDiv = document.getElementById('activities');
       activitiesDiv.innerHTML = '';
@@ -110,18 +120,28 @@
       for (let i = 1; i <= numDays; i++) {
         const dayDiv = document.createElement('div');
         dayDiv.innerHTML = `
-          <label for="activity-${i}">Day ${i} Activity:</label>
-          <select id="activity-${i}" name="activity-${i}" onchange="updateDescription(${i})" required></select>
-          <label for="description-${i}">Description:</label>
-          <textarea id="description-${i}" name="description-${i}" required></textarea>
-          <label for="meals-${i}">Meals:</label>
-          <select id="meals-${i}" name="meals-${i}" required></select>
-          <label for="hotelCity-${i}">City of Hotel:</label>
-          <select id="hotelCity-${i}" name="hotelCity-${i}" onchange="populateHotelTypeOptions(${i})" required></select>
-          <label for="hotelType-${i}">Hotel Type:</label>
-          <select id="hotelType-${i}" name="hotelType-${i}" onchange="populateHotelNameOptions(${i})" required></select>
-          <label for="hotel-${i}">Hotel:</label>
-          <select id="hotel-${i}" name="hotel-${i}" required></select>
+         <label for="activity-${i}">Day ${i} Activity:</label>
+<select id="activity-${i}" name="activity-${i}" onchange="updateDescription(${i})" required></select><br>
+
+<label for="description-${i}">Description:</label>
+<textarea id="description-${i}" name="description-${i}" required></textarea><br>
+
+<label for="meals-${i}">Meals:</label>
+<select id="meals-${i}" name="meals-${i}" required></select><br>
+
+<label for="hotelCity-${i}">City of Hotel:</label>
+<select id="hotelCity-${i}" name="hotelCity-${i}" onchange="populateHotelTypeOptions(${i}); updateFeesForPlaces();" required></select><br>
+
+<label for="hotelType-${i}">Hotel Type:</label>
+<select id="hotelType-${i}" name="hotelType-${i}" onchange="populateHotelNameOptions(${i})" required></select><br>
+
+<label for="hotel-${i}">Hotel:</label>
+<select id="hotel-${i}" name="hotel-${i}" required></select><br>
+
+<div id="customHotel-${i}" style="display: none;">
+  <label for="customHotelInput-${i}">Enter Hotel Name:</label>
+  <input type="text" id="customHotelInput-${i}" name="customHotelInput-${i}">
+</div><br>
         `;
         activitiesDiv.appendChild(dayDiv);
         populateActivityOptions(i);
@@ -133,7 +153,7 @@
     function populateHotelCityOptions(dayIndex) {
       const select = document.getElementById(`hotelCity-${dayIndex}`);
       const citiesSet = new Set(hotelData.map(hotel => hotel.city));
-      select.innerHTML = ''; // Clear previous options
+      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
       citiesSet.forEach(city => {
         const option = document.createElement('option');
         option.value = city;
@@ -147,7 +167,7 @@
       const typeSelect = document.getElementById(`hotelType-${dayIndex}`);
       const selectedCity = citySelect.value;
       const typesSet = new Set(hotelData.filter(hotel => hotel.city === selectedCity).map(hotel => hotel.type));
-      typeSelect.innerHTML = ''; // Clear previous options
+      typeSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
       typesSet.forEach(type => {
         const option = document.createElement('option');
         option.value = type;
@@ -162,106 +182,148 @@
       const nameSelect = document.getElementById(`hotel-${dayIndex}`);
       const selectedCity = citySelect.value;
       const selectedType = typeSelect.value;
-      const hotels = hotelData.find(hotel => hotel.city === selectedCity && hotel.type === selectedType).name.split(', ');
-      nameSelect.innerHTML = ''; // Clear previous options
-      hotels.forEach(hotel => {
+
+      // Filter hotels based on selected city and type
+      const hotels = hotelData.filter(hotel => hotel.city === selectedCity && hotel.type === selectedType);
+
+      nameSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+
+      // Collect all hotel names from filtered hotels
+      const hotelNames = hotels.reduce((names, hotel) => {
+        // Split the names by comma and trim any extra whitespace
+        const namesArray = hotel.name.split(',').map(name => name.trim());
+        names.push(...namesArray);
+        return names;
+      }, []);
+
+      // Remove duplicates using Set and convert back to array
+      const uniqueHotelNames = Array.from(new Set(hotelNames));
+
+      // Create options for each hotel name
+      uniqueHotelNames.forEach(name => {
         const option = document.createElement('option');
-        option.value = hotel;
-        option.textContent = hotel;
+        option.value = name;
+        option.textContent = name;
         nameSelect.appendChild(option);
+      });
+
+      // Add "None of the above" option
+      const noneOption = document.createElement('option');
+      noneOption.value = "none";
+      noneOption.textContent = "None of the above";
+      nameSelect.appendChild(noneOption);
+
+
+      // Add "departure" option
+      const departureOption = document.createElement('option');
+      departureOption.value = "departure";
+      departureOption.textContent = "Departure";
+      nameSelect.appendChild(departureOption);
+
+
+      // Add event listener to show/hide custom hotel input
+      nameSelect.addEventListener('change', function() {
+        const customHotelDiv = document.getElementById(`customHotel-${dayIndex}`);
+        if (nameSelect.value === "none") {
+          customHotelDiv.style.display = 'block';
+        } else {
+          customHotelDiv.style.display = 'none';
+        }
       });
     }
 
-    function createCityFields(numCities) {
-      const citiesDiv = document.getElementById('cities');
-      citiesDiv.innerHTML = '';
+async function handleSubmit(event) {
+  event.preventDefault();
 
-      for (let i = 1; i <= numCities; i++) {
-        const cityDiv = document.createElement('div');
-        cityDiv.innerHTML = `
-          <label for="city-${i}">City ${i}:</label>
-          <select id="city-${i}" name="city-${i}" onchange="populateAccommodationOptions(${i})" required></select>
-          <label for="accommodation-${i}">Accommodation:</label>
-          <select id="accommodation-${i}" name="accommodation-${i}" required></select>
-        `;
-        citiesDiv.appendChild(cityDiv);
-        populateCityOptions(i);
-      }
-    }
+  const formData = new FormData(event.target);
+  const formObject = Object.fromEntries(formData.entries());
 
-    async function handleSubmit(event) {
-      event.preventDefault();
+  const numDays = parseInt(formObject.numDays);
 
-      const formData = new FormData(event.target);
-      const formObject = Object.fromEntries(formData.entries());
+  const travelTb = {
+    travelDay: [],
+    activity: []
+  };
 
-      const numDays = parseInt(formObject.numDays);
-      const numCities = parseInt(formObject.numCities);
+  let noOfB = 0, noOfL = 0, noOfD = 0;
 
-      const travelTb = {
-        travelDay: [],
-        activity: []
-      };
+  for (let i = 1; i <= numDays; i++) {
+    travelTb.travelDay.push(`Day ${i}`);
+    travelTb.activity.push(formObject[`activity-${i}`]);
 
-      for (let i = 1; i <= numDays; i++) {
-        travelTb.travelDay.push(`Day ${i}`);
-        travelTb.activity.push(formObject[`activity-${i}`]);
-      }
+    const meals = formObject[`meals-${i}`];
+    if (meals.includes('B')) noOfB++;
+    if (meals.includes('L')) noOfL++;
+    if (meals.includes('D')) noOfD++;
+  }
 
-      const output = {
-        logo: defaultValues.logo,
-        address: defaultValues.address,
-        phone: defaultValues.phone,
-        email: defaultValues.email,
-        web: defaultValues.web,
-        imgCover: defaultValues.imgCover,
-        tourDur: `${numDays} Days - Sri Lanka`,
-        noOfNights: `${numDays} Days/ ${numDays - 1} Nights`,
-        mapPlanImg: formObject.mapPlanImg,
-        route: formObject.route,
-        name: formObject.name,
-        travellers: formObject.travellers,
-        travelDate: formObject.travelDate,
-        travelTb: travelTb,
-        accommodations: {},
-        information: defaultValues.information
-      };
+  const startDate = new Date(formObject.travelDate);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + numDays - 1);
 
-      for (let i = 1; i <= numCities; i++) {
-        const city = formObject[`city-${i}`];
-        const accommodation = formObject[`accommodation-${i}`];
-        output.accommodations[city] = accommodation;
-      }
+  const output = {
+    logo: defaultValues.logo,
+    address: defaultValues.address,
+    phone: defaultValues.phone,
+    email: defaultValues.email,
+    web: defaultValues.web,
+    imgCover: defaultValues.imgCover,
+    tourDur: `${numDays} Days - Sri Lanka`,
+    noOfNights: `${numDays} Days/ ${numDays - 1} Nights`,
+    mapPlanImg: formObject.mapPlanImg,
+    route: formObject.route,
+    name: formObject.name,
+    travellers: formObject.travellers,
+    travelDate: `Start - ${startDate.toLocaleDateString('en-GB')}, End - ${endDate.toLocaleDateString('en-GB')}`,
+    travelTb: travelTb,
+    accommodations: {},
+    information: defaultValues.information,
+    noOfB: noOfB,
+    noOfL: noOfL,
+    noOfD: noOfD,
+    languages: formObject.languages,
+    visaValue: formObject.visaValue,
+    feesForPlaces: formObject.feesForPlaces // Include feesForPlaces in the output
+  };
 
-      for (let i = 1; i <= numDays; i++) {
-        const date = new Date(formObject.travelDate);
-        date.setDate(date.getDate() + i - 1);
-        const dayKey = `Day${i}`;
-        output[dayKey] = {
-          date: `(${date.toLocaleDateString('en-GB')})`,
-          description: formObject[`description-${i}`],
-          meals: formObject[`meals-${i}`],
-          hotelCity: formObject[`hotelCity-${i}`],
-          hotelType: formObject[`hotelType-${i}`],
-          hotel: formObject[`hotel-${i}`] // Include the hotel information for each day
-        };
-      }
+  const citySelects = document.querySelectorAll('[id^=city-]');
+  citySelects.forEach((select, i) => {
+    const city = select.value;
+    const accommodation = document.getElementById(`accommodation-${i + 1}`).value;
+    output.accommodations[city] = accommodation;
+  });
 
-      try {
-        const response = await fetch('/save', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(output),
-        });
+  for (let i = 1; i <= numDays; i++) {
+    const date = new Date(formObject.travelDate);
+    date.setDate(date.getDate() + i - 1);
+    const dayKey = `Day ${i}`;
+    const hotelSelect = document.getElementById(`hotel-${i}`);
+    const hotelName = hotelSelect.value === "none" ? formData.get(`customHotelInput-${i}`) : hotelSelect.value;
+    output[dayKey] = {
+      date: `(${date.toLocaleDateString('en-GB')})`,
+      description: formObject[`description-${i}`],
+      meals: formObject[`meals-${i}`],
+      hotelCity: formObject[`hotelCity-${i}`],
+      hotelType: formObject[`hotelType-${i}`],
+      hotel: hotelName // Include the hotel information for each day
+    };
+  }
 
-        const result = await response.json();
-        document.getElementById('userID').textContent = `Form ID :- ${result.userID}`;
-      } catch (error) {
-        console.error('Error saving data:', error);
-      }
-    }
+  try {
+    const response = await fetch('/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(output),
+    });
+
+    const result = await response.json();
+    document.getElementById('userID').textContent = `Form ID :- ${result.userID}`;
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+}
 
     function updateDescription(dayIndex) {
       const selectedActivity = document.getElementById(`activity-${dayIndex}`).value;
@@ -269,33 +331,51 @@
       document.getElementById(`description-${dayIndex}`).value = activity ? activity.description : '';
     }
 
+    function updateFeesForPlaces() {
+      const hotelCities = new Set();
+      document.querySelectorAll('[id^=hotelCity-]').forEach(select => {
+        if (select.value) {
+          hotelCities.add(select.value);
+        }
+      });
+      document.getElementById('feesForPlaces').value = Array.from(hotelCities).join('\n');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       fetchOptions();
 
       document.getElementById('numDays').addEventListener('input', event => {
         createActivityFields(event.target.value);
-      });
-
-      document.getElementById('numCities').addEventListener('input', event => {
-        createCityFields(event.target.value);
+        updateFeesForPlaces();
       });
 
       document.getElementById('tourForm').addEventListener('submit', handleSubmit);
     });
-
   </script>
 </head>
 <body>
-  <h1>Tour Form</h1>
+
+  <div class="nav">
+    <div class="logo">
+    <img src="img/default.png" height="45px" />
+    <h3>EuroLanka Itinerary Maker</h3>
+    </div>
+
+    <img src="img/logout.png" id="logout" onclick="document.location.replace('/logout')" />
+</div>
+    <div class="boo">
+        <img src="img/google-forms.png" />
+    <h1>Tour Form</h1>
+    </div>
+
+<div class="space"></div>
+
   <div class="back-button" onclick="document.location.replace('/')">
     <i class="fas fa-arrow-left"></i>
 </div>
   <form id="tourForm">
     <label for="numDays">Tour Duration (Number of Days):</label>
     <input type="number" id="numDays" name="numDays" required><br>
-
-    <label for="numCities">Number of Cities:</label>
-    <input type="number" id="numCities" name="numCities" required><br>
 
     <label for="tourDur">Tour Duration Description:</label>
     <input type="text" id="tourDur" name="tourDur" value="Auto Generated!" readonly><br>
@@ -318,6 +398,26 @@
     <label for="travelDate">Travel Date:</label>
     <input type="date" id="travelDate" name="travelDate" required><br>
 
+    <label for="languages">Languages:</label>
+    <br/>
+    <div id="languages">
+      <input type="checkbox" id="english" name="languages" value="English">
+      <label for="english">English</label>
+      <input type="checkbox" id="german" name="languages" value="German">
+      <label for="german">German</label>
+      <input type="checkbox" id="arabic" name="languages" value="Arabic">
+      <label for="arabic">Arabic</label>
+      <input type="checkbox" id="tamil" name="languages" value="Tamil">
+      <label for="tamil">Tamil</label>
+    </div>
+    <br /><br />
+
+    <label for="visaValue">Visa Value:</label>
+    <input type="number" id="visaValue" name="visaValue" required><br>
+
+    <label for="feesForPlaces">Fees for Places:</label>
+    <textarea id="feesForPlaces" name="feesForPlaces" required></textarea><br>
+
     <label for="address">Address:</label>
     <textarea id="address" name="address" readonly></textarea><br>
 
@@ -337,6 +437,10 @@
   </form>
   <p id="userID"></p><br>
   <p>Once you received the id <b>copy it,</b> and <a href="/output">click here.</a></p>
+
+  <div class="bottom">
+    &copy; <a href="https://eurolanka.net/">EuroLanka Travel</a> 2024. All Rights Reserved.
+</div>
   
 </body>
 </html>
