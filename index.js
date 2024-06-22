@@ -65,6 +65,7 @@ app.post('/login', async (req, res) => {
     const otp = generateOTP();
     otpStore[email] = otp;
     const phoneNumber = user.phoneNumber
+    const mono = "```";
     const Smessage = `*OTP code for EuroLanka - Itinerary Maker is,* 
 
 ${mono}• ${otp}${mono}
