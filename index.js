@@ -32,7 +32,6 @@ app.use(cookieSession({
 }));
 
 const users = JSON.parse(fs.readFileSync('data/phoneNumbers.json', 'utf8'));
-const otpStore = {}; // To store OTPs temporarily
 
 // Serve static files
 //app.use(express.static(path.join(__dirname, 'public')));
@@ -53,49 +52,16 @@ app.get('/', (req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Login route
 app.post('/login', async (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
     const user = users.find(user => user.email === email);
-    if (!user) {
-        return res.status(400).send('User not found');
-    }
-
-    const otp = generateOTP();
-    otpStore[email] = otp;
-    const phoneNumber = user.phoneNumber
-    const mono = "```";
-    const Smessage = `*OTP code for EuroLanka - Itinerary Maker is,* 
-
-${mono}• ${otp}${mono}
-
-> Don't share this code with others.
-> Powered by Z'MAIL`
-
-    try {
-        // Send OTP via the baileysotp service
-        await axios.post('https://baileysotp.onrender.com/message', { phoneNumber, otp, Smessage });
-
-        res.send('OTP sent');
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        res.status(500).send('Error sending OTP');
-    }
-});
-
-// Verify OTP route
-app.post('/verify-otp', (req, res) => {
-    const { email, otp } = req.body;
-    const storedOTP = otpStore[email];
-
-    if (!storedOTP || storedOTP !== otp) {
-        return res.status(400).send('Invalid OTP');
+    if (!user || user.password !== password) {
+        return res.status(400).send('Invalid email or password');
     }
 
     req.session.isLoggedIn = true;
     req.session.email = email;
-    delete otpStore[email];
 
     const token = jwt.sign({ email }, 'secret_key');
 
