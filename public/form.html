@@ -19,19 +19,19 @@
   try {
     const activityRes = await fetch('/api/activityData');
     const defRes = await fetch('/api/def');
-    const cityRes = await fetch('/api/cityData'); // Ensure you have an endpoint for city data
+    //const cityRes = await fetch('/api/cityData'); // Ensure you have an endpoint for city data
     const hotelRes = await fetch('/api/hotelData');
 
     const activityData = await activityRes.json();
     const defData = await defRes.json();
-    const cityData = await cityRes.json(); // Fetch city data correctly
+    //const cityData = await cityRes.json(); // Fetch city data correctly
     const hotelDataRes = await hotelRes.json();
 
     // Populate activities array
     activityData.forEach(activity => activities.push(activity));
 
     // Populate cities array
-    cityData.forEach(city => cities.push(city));
+    //cityData.forEach(city => cities.push(city));
 
     // Populate hotelData array
     hotelDataRes.forEach(hotel => hotelData.push(hotel));

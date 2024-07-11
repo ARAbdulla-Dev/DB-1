@@ -77,9 +77,11 @@ app.get('/form', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
+/*
 app.get('/cityData', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'cityData.html'));
 });
+*/
 
 app.get('/hotelData', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'hotelData.html'));
@@ -148,7 +150,7 @@ app.get('/form', (req, res) => {
 
 
 const activityDB = path.join(__dirname, 'data', 'activityData.json');
-const cityDB = path.join(__dirname, 'data', 'cityData.json');
+//const cityDB = path.join(__dirname, 'data', 'cityData.json');
 const hotelDB = path.join(__dirname, 'data', 'hotelData.json');
 
 // =======================================================================================================
@@ -241,7 +243,7 @@ app.delete('/api/activityData/:id', (req, res) => {
 // =======================================================================================================
 
 // Create data directory if not exists
-if (!fs.existsSync(path.dirname(cityDB))) {
+/*if (!fs.existsSync(path.dirname(cityDB))) {
     fs.mkdirSync(path.dirname(cityDB), { recursive: true });
 }
 
@@ -327,6 +329,7 @@ app.delete('/api/cityData/:id', (req, res) => {
     });
 });
 
+*/
 // =======================================================================================================
 
 // Create data directory if not exists
