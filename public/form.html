@@ -55,56 +55,64 @@
   }
 }
 
-    function populateActivityOptions(dayIndex) {
-      const select = document.getElementById(`activity-${dayIndex}`);
-      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-      activities.forEach(activity => {
-        const option = document.createElement('option');
-        option.value = activity.activity;
-        option.textContent = activity.activity;
-        select.appendChild(option);
-      });
-    }
+function populateActivityOptions(dayIndex) {
+  const select = document.getElementById(`activity-${dayIndex}`);
+  select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+  activities.sort((a, b) => a.activity.localeCompare(b.activity)); // Sort activities alphabetically
+  activities.forEach(activity => {
+    const option = document.createElement('option');
+    option.value = activity.activity;
+    option.textContent = activity.activity;
+    select.appendChild(option);
+  });
+}
 
-    function populateMealsOptions(dayIndex) {
-      const select = document.getElementById(`meals-${dayIndex}`);
-      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-      mealsOptions.forEach(meal => {
-        const option = document.createElement('option');
-        option.value = meal;
-        option.textContent = meal;
-        select.appendChild(option);
-      });
-    }
 
-    function populateCityOptions(cityIndex) {
-      const select = document.getElementById(`city-${cityIndex}`);
-      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-      cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city.city;
-        option.textContent = city.city;
-        select.appendChild(option);
-      });
-    }
+function populateMealsOptions(dayIndex) {
+  const select = document.getElementById(`meals-${dayIndex}`);
+  select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+  mealsOptions.sort((a, b) => a.localeCompare(b)); // Sort meals alphabetically
+  mealsOptions.forEach(meal => {
+    const option = document.createElement('option');
+    option.value = meal;
+    option.textContent = meal;
+    select.appendChild(option);
+  });
+}
 
-    function populateAccommodationOptions(cityIndex) {
-      const citySelect = document.getElementById(`city-${cityIndex}`);
-      const accommodationSelect = document.getElementById(`accommodation-${cityIndex}`);
-      accommodationSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
 
-      const selectedCity = citySelect.value;
-      const city = cities.find(city => city.city === selectedCity);
+function populateCityOptions(cityIndex) {
+  const select = document.getElementById(`city-${cityIndex}`);
+  select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+  cities.sort((a, b) => a.city.localeCompare(b.city)); // Sort cities alphabetically
+  cities.forEach(city => {
+    const option = document.createElement('option');
+    option.value = city.city;
+    option.textContent = city.city;
+    select.appendChild(option);
+  });
+}
 
-      if (city) {
-        city.places.split(', ').forEach(acc => {
-          const option = document.createElement('option');
-          option.value = acc;
-          option.textContent = acc;
-          accommodationSelect.appendChild(option);
-        });
-      }
-    }
+function populateAccommodationOptions(cityIndex) {
+  const citySelect = document.getElementById(`city-${cityIndex}`);
+  const accommodationSelect = document.getElementById(`accommodation-${cityIndex}`);
+  accommodationSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+
+  const selectedCity = citySelect.value;
+  const city = cities.find(city => city.city === selectedCity);
+
+  if (city) {
+    const accommodations = city.places.split(', ');
+    accommodations.sort((a, b) => a.localeCompare(b)); // Sort accommodations alphabetically
+    accommodations.forEach(acc => {
+      const option = document.createElement('option');
+      option.value = acc;
+      option.textContent = acc;
+      accommodationSelect.appendChild(option);
+    });
+  }
+}
+
 
 
 
@@ -151,86 +159,86 @@
     }
 
     function populateHotelCityOptions(dayIndex) {
-      const select = document.getElementById(`hotelCity-${dayIndex}`);
-      const citiesSet = new Set(hotelData.map(hotel => hotel.city));
-      select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-      citiesSet.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
-        select.appendChild(option);
-      });
+  const select = document.getElementById(`hotelCity-${dayIndex}`);
+  const citiesSet = new Set(hotelData.map(hotel => hotel.city));
+  const citiesArray = Array.from(citiesSet).sort((a, b) => a.localeCompare(b)); // Sort cities alphabetically
+  select.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+  citiesArray.forEach(city => {
+    const option = document.createElement('option');
+    option.value = city;
+    option.textContent = city;
+    select.appendChild(option);
+  });
+}
+
+function populateHotelTypeOptions(dayIndex) {
+  const citySelect = document.getElementById(`hotelCity-${dayIndex}`);
+  const typeSelect = document.getElementById(`hotelType-${dayIndex}`);
+  const selectedCity = citySelect.value;
+  const typesSet = new Set(hotelData.filter(hotel => hotel.city === selectedCity).map(hotel => hotel.type));
+  const typesArray = Array.from(typesSet).sort((a, b) => a.localeCompare(b)); // Sort types alphabetically
+  typeSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+  typesArray.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    typeSelect.appendChild(option);
+  });
+}
+
+function populateHotelNameOptions(dayIndex) {
+  const citySelect = document.getElementById(`hotelCity-${dayIndex}`);
+  const typeSelect = document.getElementById(`hotelType-${dayIndex}`);
+  const nameSelect = document.getElementById(`hotel-${dayIndex}`);
+  const selectedCity = citySelect.value;
+  const selectedType = typeSelect.value;
+
+  // Filter hotels based on selected city and type
+  const hotels = hotelData.filter(hotel => hotel.city === selectedCity && hotel.type === selectedType);
+
+  nameSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
+
+  // Collect all hotel names from filtered hotels
+  const hotelNames = hotels.reduce((names, hotel) => {
+    // Split the names by comma and trim any extra whitespace
+    const namesArray = hotel.name.split(',').map(name => name.trim());
+    names.push(...namesArray);
+    return names;
+  }, []);
+
+  // Remove duplicates using Set and convert back to array
+  const uniqueHotelNames = Array.from(new Set(hotelNames)).sort((a, b) => a.localeCompare(b)); // Sort names alphabetically
+
+  // Create options for each hotel name
+  uniqueHotelNames.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    nameSelect.appendChild(option);
+  });
+
+  // Add "None of the above" option
+  const noneOption = document.createElement('option');
+  noneOption.value = "none";
+  noneOption.textContent = "None of the above";
+  nameSelect.appendChild(noneOption);
+
+  // Add "departure" option
+  const departureOption = document.createElement('option');
+  departureOption.value = "departure";
+  departureOption.textContent = "Departure";
+  nameSelect.appendChild(departureOption);
+
+  // Add event listener to show/hide custom hotel input
+  nameSelect.addEventListener('change', function() {
+    const customHotelDiv = document.getElementById(`customHotel-${dayIndex}`);
+    if (nameSelect.value === "none") {
+      customHotelDiv.style.display = 'block';
+    } else {
+      customHotelDiv.style.display = 'none';
     }
-
-    function populateHotelTypeOptions(dayIndex) {
-      const citySelect = document.getElementById(`hotelCity-${dayIndex}`);
-      const typeSelect = document.getElementById(`hotelType-${dayIndex}`);
-      const selectedCity = citySelect.value;
-      const typesSet = new Set(hotelData.filter(hotel => hotel.city === selectedCity).map(hotel => hotel.type));
-      typeSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-      typesSet.forEach(type => {
-        const option = document.createElement('option');
-        option.value = type;
-        option.textContent = type;
-        typeSelect.appendChild(option);
-      });
-    }
-
-    function populateHotelNameOptions(dayIndex) {
-      const citySelect = document.getElementById(`hotelCity-${dayIndex}`);
-      const typeSelect = document.getElementById(`hotelType-${dayIndex}`);
-      const nameSelect = document.getElementById(`hotel-${dayIndex}`);
-      const selectedCity = citySelect.value;
-      const selectedType = typeSelect.value;
-
-      // Filter hotels based on selected city and type
-      const hotels = hotelData.filter(hotel => hotel.city === selectedCity && hotel.type === selectedType);
-
-      nameSelect.innerHTML = '<option value="" selected>Please select</option>'; // Clear previous options
-
-      // Collect all hotel names from filtered hotels
-      const hotelNames = hotels.reduce((names, hotel) => {
-        // Split the names by comma and trim any extra whitespace
-        const namesArray = hotel.name.split(',').map(name => name.trim());
-        names.push(...namesArray);
-        return names;
-      }, []);
-
-      // Remove duplicates using Set and convert back to array
-      const uniqueHotelNames = Array.from(new Set(hotelNames));
-
-      // Create options for each hotel name
-      uniqueHotelNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        nameSelect.appendChild(option);
-      });
-
-      // Add "None of the above" option
-      const noneOption = document.createElement('option');
-      noneOption.value = "none";
-      noneOption.textContent = "None of the above";
-      nameSelect.appendChild(noneOption);
-
-
-      // Add "departure" option
-      const departureOption = document.createElement('option');
-      departureOption.value = "departure";
-      departureOption.textContent = "Departure";
-      nameSelect.appendChild(departureOption);
-
-
-      // Add event listener to show/hide custom hotel input
-      nameSelect.addEventListener('change', function() {
-        const customHotelDiv = document.getElementById(`customHotel-${dayIndex}`);
-        if (nameSelect.value === "none") {
-          customHotelDiv.style.display = 'block';
-        } else {
-          customHotelDiv.style.display = 'none';
-        }
-      });
-    }
+  });
+}
 
 async function handleSubmit(event) {
   event.preventDefault();
