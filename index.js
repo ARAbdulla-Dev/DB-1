@@ -37,15 +37,15 @@ const users = JSON.parse(fs.readFileSync('data/phoneNumbers.json', 'utf8'));
 //app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to check authentication
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
     if (req.session.isLoggedIn) {
         return next();
     }
-    res.redirect('/');
+    await res.redirect('/');
 };
 
 // Serve login.html at the root route
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     if (req.session.isLoggedIn) {
         return res.redirect('/home');
     }
@@ -65,16 +65,16 @@ app.post('/login', async (req, res) => {
 
     const token = jwt.sign({ email }, 'secret_key');
 
-    res.send({ token });
+    await res.send({ token });
 });
 
 // Serve protected routes
-app.get('/home', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/home', isAuthenticated, async (req, res) => {
+    await res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/form', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'form.html'));
+app.get('/form', isAuthenticated, async (req, res) => {
+    await res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
 /*
@@ -83,70 +83,33 @@ app.get('/cityData', isAuthenticated, (req, res) => {
 });
 */
 
-app.get('/hotelData', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'hotelData.html'));
+app.get('/hotelData', isAuthenticated, async (req, res) => {
+    await res.sendFile(path.join(__dirname, 'public', 'hotelData.html'));
 });
 
-app.get('/activityData', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'activityData.html'));
+app.get('/activityData', isAuthenticated, async (req, res) => {
+    await res.sendFile(path.join(__dirname, 'public', 'activityData.html'));
 });
 
-app.get('/output', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'output.html'));
+app.get('/output', isAuthenticated, async (req, res) => {
+    await res.sendFile(path.join(__dirname, 'public', 'output.html'));
 });
 
 
 // Logout route
-app.get('/logout', (req, res) => {
+app.get('/logout', async (req, res) => {
     req.session = null;
-    res.redirect('/');
+    await res.redirect('/');
 });
 
-/*
-app.get('/styles.css', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'styles.css'));
-});
-
-app.get('/formstyles.css', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'formstyles.css'));
-});
-
-app.get('/script.js', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'script.js'));
-});
-
-app.get('/img/default.png', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'img', 'default.png'));
-});*/
-
-
-//app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
-//app.use('/example', express.static(path.join(__dirname, 'public', 'example')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 
 
-// Generate a random 6-digit OTP
-const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-};
 
-        const readFileAsync = promisify(fs.readFile);
+const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
-//app.use(express.static('public'));
-
-/*
-// Serve form.html at the /form route
-app.get('/form', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'form.html'));
-  });
-  
-  // Serve output.html at the /form route
-  app.get('/output', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'output.html'));
-  });
-  */
 
 
 const activityDB = path.join(__dirname, 'data', 'activityData.json');
@@ -159,8 +122,8 @@ if (!fs.existsSync(path.dirname(activityDB))) {
     fs.mkdirSync(path.dirname(activityDB), { recursive: true });
 }
 
-app.get('/api/activityData', (req, res) => {
-    fs.readFile(activityDB, 'utf8', (err, data) => {
+app.get('/api/activityData', async (req, res) => {
+    await fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -168,12 +131,12 @@ app.get('/api/activityData', (req, res) => {
     });
 });
 
-app.post('/api/activityData', (req, res) => {
+app.post('/api/activityData', async (req, res) => {
     const { activity, description, price } = req.body;
     const id = uuidv4();
     const newRecord = { id, activity, description, price };
 
-    fs.readFile(activityDB, 'utf8', (err, data) => {
+    await fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -190,11 +153,11 @@ app.post('/api/activityData', (req, res) => {
     });
 });
 
-app.put('/api/activityData/:id', (req, res) => {
+app.put('/api/activityData/:id', async (req, res) => {
     const id = req.params.id;
     const { activity, description, price } = req.body;
 
-    fs.readFile(activityDB, 'utf8', (err, data) => {
+    await fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -216,10 +179,10 @@ app.put('/api/activityData/:id', (req, res) => {
     });
 });
 
-app.delete('/api/activityData/:id', (req, res) => {
+app.delete('/api/activityData/:id', async (req, res) => {
     const id = req.params.id;
 
-    fs.readFile(activityDB, 'utf8', (err, data) => {
+    await fs.readFile(activityDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -240,105 +203,14 @@ app.delete('/api/activityData/:id', (req, res) => {
         });
     });
 });
-// =======================================================================================================
-
-// Create data directory if not exists
-/*if (!fs.existsSync(path.dirname(cityDB))) {
-    fs.mkdirSync(path.dirname(cityDB), { recursive: true });
-}
-
-app.get('/api/cityData', (req, res) => {
-    fs.readFile(cityDB, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error reading data file' });
-        }
-        res.status(200).json(JSON.parse(data));
-    });
-});
-
-app.post('/api/cityData', (req, res) => {
-    const { city, places } = req.body;
-    const id = uuidv4();
-    const newRecord = { id, city, places };
-
-    fs.readFile(cityDB, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error reading data file' });
-        }
-
-        const jsonData = JSON.parse(data);
-        jsonData.push(newRecord);
-
-        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error writing to data file' });
-            }
-            res.status(200).json({ message: 'Data saved successfully', id });
-        });
-    });
-});
-
-app.put('/api/cityData/:id', (req, res) => {
-    const id = req.params.id;
-    const { city, places } = req.body;
-
-    fs.readFile(cityDB, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error reading data file' });
-        }
-
-        let jsonData = JSON.parse(data);
-        const index = jsonData.findIndex(item => item.id === id);
-        if (index === -1) {
-            return res.status(404).json({ error: 'Record not found' });
-        }
-
-        jsonData[index] = { id, city, places };
-
-        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error writing to data file' });
-            }
-            res.status(200).json({ message: 'Data updated successfully' });
-        });
-    });
-});
-
-app.delete('/api/cityData/:id', (req, res) => {
-    const id = req.params.id;
-
-    fs.readFile(cityDB, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error reading data file' });
-        }
-
-        let jsonData = JSON.parse(data);
-        const index = jsonData.findIndex(item => item.id === id);
-        if (index === -1) {
-            return res.status(404).json({ error: 'Record not found' });
-        }
-
-        jsonData.splice(index, 1);
-
-        fs.writeFile(cityDB, JSON.stringify(jsonData, null, 2), (err) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error writing to data file' });
-            }
-            res.status(200).json({ message: 'Record deleted successfully' });
-        });
-    });
-});
-
-*/
-// =======================================================================================================
 
 // Create data directory if not exists
 if (!fs.existsSync(path.dirname(hotelDB))) {
     fs.mkdirSync(path.dirname(hotelDB), { recursive: true });
 }
 
-app.get('/api/hotelData', (req, res) => {
-    fs.readFile(hotelDB, 'utf8', (err, data) => {
+app.get('/api/hotelData', async (req, res) => {
+    await fs.readFile(hotelDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -346,12 +218,12 @@ app.get('/api/hotelData', (req, res) => {
     });
 });
 
-app.post('/api/hotelData', (req, res) => {
+app.post('/api/hotelData', async (req, res) => {
     const { city, type, name } = req.body;
     const id = uuidv4();
     const newRecord = { id, city, type, name };
 
-    fs.readFile(hotelDB, 'utf8', (err, data) => {
+    await fs.readFile(hotelDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -368,11 +240,11 @@ app.post('/api/hotelData', (req, res) => {
     });
 });
 
-app.put('/api/hotelData/:id', (req, res) => {
+app.put('/api/hotelData/:id', async (req, res) => {
     const id = req.params.id;
     const  {city, type, name } = req.body;
 
-    fs.readFile(hotelDB, 'utf8', (err, data) => {
+    await fs.readFile(hotelDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -394,10 +266,10 @@ app.put('/api/hotelData/:id', (req, res) => {
     });
 });
 
-app.delete('/api/hotelData/:id', (req, res) => {
+app.delete('/api/hotelData/:id', async (req, res) => {
     const id = req.params.id;
 
-    fs.readFile(hotelDB, 'utf8', (err, data) => {
+    await fs.readFile(hotelDB, 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Error reading data file' });
         }
@@ -421,8 +293,8 @@ app.delete('/api/hotelData/:id', (req, res) => {
 // =======================================================================================================
 
 
-app.get('/api/def', (req, res) => {
-    const filePath = path.join(__dirname, 'data', 'default.json');
+app.get('/api/def', async (req, res) => {
+    const filePath = await path.join(__dirname, 'data', 'default.json');
     fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {
         res.status(500).send('Error reading file');
@@ -432,11 +304,11 @@ app.get('/api/def', (req, res) => {
     });
   });
   
-  app.post('/save', (req, res) => {
+  app.post('/save', async (req, res) => {
     const userID = uuidv4().slice(0, 10);
-    const dataPath = path.join(__dirname, 'data', `${userID}.json`);
+    const dataPath = await path.join(__dirname, 'data', `${userID}.json`);
   
-    fs.writeFile(dataPath, JSON.stringify(req.body, null, 2), (err) => {
+    await fs.writeFile(dataPath, JSON.stringify(req.body, null, 2), (err) => {
       if (err) {
         res.status(500).send('Error saving data');
         return;
@@ -446,10 +318,10 @@ app.get('/api/def', (req, res) => {
   });
   
   // Endpoint to list and serve all data files
-  app.get('/data', (req, res) => {
-      const dataDir = path.join(__dirname, 'data');
+  app.get('/data', async (req, res) => {
+      const dataDir = await path.join(__dirname, 'data');
       
-      fs.readdir(dataDir, (err, files) => {
+      await fs.readdir(dataDir, (err, files) => {
         if (err) {
           res.status(500).send('Error reading data directory');
           return;
@@ -467,12 +339,12 @@ app.get('/api/def', (req, res) => {
     
   
     // Endpoint to list and serve all data files
-  app.get('/data/:userID', (req, res) => {
+  app.get('/data/:userID', async (req, res) => {
     const { userID } = req.params;
-    const dataDir = path.join(__dirname, 'data');
-    const filePath = path.join(dataDir, `${userID}.json`);
+    const dataDir = await path.join(__dirname, 'data');
+    const filePath = await path.join(dataDir, `${userID}.json`);
   
-    fs.readFile(filePath, 'utf8', (err, data) => {
+    await fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {
         res.status(404).json({ error: 'No data found for the provided User ID.' });
         return;
@@ -576,7 +448,7 @@ app.get('/api/def', (req, res) => {
       });
   
       // Set the data into the template
-      docx.setData({
+      await docx.setData({
         ...data,
         travelDays: travelDays,
         accommodationsEntries: accommodationsEntries,
@@ -584,10 +456,10 @@ app.get('/api/def', (req, res) => {
       });
   
       // Render the document
-      docx.render();
+      await docx.render();
   
       // Write the output file
-      const buffer = docx.getZip().generate({ type: 'nodebuffer' });
+      const buffer = await docx.getZip().generate({ type: 'nodebuffer' });
       await writeFileAsync(outputFilePath, buffer);
   
       console.log('Word document generated successfully.');
@@ -598,7 +470,7 @@ app.get('/api/def', (req, res) => {
   }
   //======================================================================================================
 
-   
+ 
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
